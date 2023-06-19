@@ -1,5 +1,4 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+const { ApolloServer } = require('apollo-server');
 
 async function main() {
     // get the client
@@ -24,6 +23,7 @@ async function main() {
 
     type Query {
         attractions: [Attraction]
+        attraction(id: Int!): Attraction 
     }
     `;
 
@@ -35,6 +35,14 @@ async function main() {
                 const [rows, fields] = await connection.execute('SELECT * FROM `attractions`');
                 return rows;
             },
+            attractions: async (parent, {id}) => {
+                const [rows, fields] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [id]);
+                if (rows.length > 0) {
+                    return rows[0];
+                }else{
+                    return [];
+                }
+            }
         },
     };
 
@@ -43,17 +51,17 @@ async function main() {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
+        csrfPrevention: true,
+        cache: 'bounded',
     });
     
     // Passing an ApolloServer instance to the `startStandaloneServer` function:
     //  1. creates an Express app
     //  2. installs your ApolloServer instance as middleware
     //  3. prepares your app to handle incoming requests
-    const { url } = await startStandaloneServer(server, {
-        listen: { port: 4000 },
+    server.listen().then(({ url }) => {
+        console.log(`🚀 Server ready at ${url}`);
     });
-    
-    console.log(`🚀  Server ready at: ${url}`);
 }
 
 main()
