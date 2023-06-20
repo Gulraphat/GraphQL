@@ -34,8 +34,9 @@ async function main() {
             attractions: async () => {
                 const [rows, fields] = await connection.execute('SELECT * FROM `attractions`');
                 return rows;
-            },
-            attractions: async (parent, {id}) => {
+            }
+            ,
+            attraction: async (parent, {id}) => {
                 const [rows, fields] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [id]);
                 if (rows.length > 0) {
                     return rows[0]
