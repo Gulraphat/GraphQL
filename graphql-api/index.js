@@ -25,6 +25,10 @@ async function main() {
         attractions: [Attraction]
         attraction(id: Int!): Attraction 
     }
+
+    type Mutation {
+        addAttraction(name: String!, detail: String!, coverimage: String!, latitude: Float!, longitude: Float!): Attraction
+    }
     `;
 
     // Resolvers define how to fetch the types defined in your schema.
@@ -41,6 +45,17 @@ async function main() {
                 if (rows.length > 0) {
                     return rows[0]
                     
+                }else{
+                    return []
+                }
+            }
+        },
+        Mutation: {
+            addAttraction: async (parent, {name, detail, coverimage, latitude, longitude}) => {
+                const [rows, fields] = await connection.execute('INSERT INTO `attractions` (`name`, `detail`, `coverimage`, `latitude`, `longitude`) VALUES (?, ?, ?, ?, ?)', [name, detail, coverimage, latitude, longitude]);
+                const [rows2, fields2] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [rows.insertId]);
+                if (rows2.length > 0) {
+                    return rows2[0]
                 }else{
                     return []
                 }
