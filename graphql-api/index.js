@@ -4,44 +4,40 @@ async function main() {
     // get the client
     const mysql = require('mysql2/promise');
     // create the connection
-    const connection = await mysql.createConnection({host:'localhost', user: 'root', database: 'graphql'});
+    const connection = await mysql.createConnection({host:'localhost', user: 'root', database: 'graphql_shop'});
     // query database
-    const [rows, fields] = await connection.execute('SELECT * FROM `attractions`');
+    const [rows, fields] = await connection.execute('SELECT * FROM `items`');
 
     // A schema is a collection of type definitions (hence "typeDefs")
     // that together define the "shape" of queries that are executed against
     // your data.
     const typeDefs = `#graphql
-    type Attraction {
+    type Item {
         id: Int
         name: String
         detail: String
-        coverimage: String
-        latitude: Float
-        longitude: Float
+        image: String
+        price: Int
     }
 
     type Query {
-        attractions: [Attraction]
-        attraction(id: Int!): Attraction 
+        items: [Item]
+        item(id: Int!): Item 
     }
-
-    type Mutation {
-        addAttraction(name: String!, detail: String!, coverimage: String!, latitude: Float!, longitude: Float!): Attraction
-    }
+    
     `;
 
     // Resolvers define how to fetch the types defined in your schema.
     // This resolver retrieves books from the "books" array above.
     const resolvers = {
         Query: {
-            attractions: async () => {
-                const [rows, fields] = await connection.execute('SELECT * FROM `attractions`');
+            items: async () => {
+                const [rows, fields] = await connection.execute('SELECT * FROM `items`');
                 return rows;
             }
             ,
-            attraction: async (parent, {id}) => {
-                const [rows, fields] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [id]);
+            item: async (parent, {id}) => {
+                const [rows, fields] = await connection.execute('SELECT * FROM `items` WHERE `id` = ?', [id]);
                 if (rows.length > 0) {
                     return rows[0]
                     
@@ -50,17 +46,17 @@ async function main() {
                 }
             }
         },
-        Mutation: {
-            addAttraction: async (parent, {name, detail, coverimage, latitude, longitude}) => {
-                const [rows, fields] = await connection.execute('INSERT INTO `attractions` (`name`, `detail`, `coverimage`, `latitude`, `longitude`) VALUES (?, ?, ?, ?, ?)', [name, detail, coverimage, latitude, longitude]);
-                const [rows2, fields2] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [rows.insertId]);
-                if (rows2.length > 0) {
-                    return rows2[0]
-                }else{
-                    return []
-                }
-            }
-        },
+        // Mutation: {
+        //     addAttraction: async (parent, {name, detail, coverimage, latitude, longitude}) => {
+        //         const [rows, fields] = await connection.execute('INSERT INTO `attractions` (`name`, `detail`, `coverimage`, `latitude`, `longitude`) VALUES (?, ?, ?, ?, ?)', [name, detail, coverimage, latitude, longitude]);
+        //         const [rows2, fields2] = await connection.execute('SELECT * FROM `attractions` WHERE `id` = ?', [rows.insertId]);
+        //         if (rows2.length > 0) {
+        //             return rows2[0]
+        //         }else{
+        //             return []
+        //         }
+        //     }
+        // },
     };
 
     // The ApolloServer constructor requires two parameters: your schema
@@ -76,8 +72,8 @@ async function main() {
     //  1. creates an Express app
     //  2. installs your ApolloServer instance as middleware
     //  3. prepares your app to handle incoming requests
-    server.listen().then(({ url }) => {
-        console.log(`🚀 Server ready at ${url}`);
+    server.listen().then({port:4000}, () => {
+        console.log(`🚀 Server ready at http://localhost:4000/`);
     });
 }
 
