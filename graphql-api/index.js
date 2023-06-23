@@ -41,7 +41,7 @@ async function main() {
     `;
 
     const resolvers = {
-        Upload: GraphQLUpload,
+        // Upload: GraphQLUpload,
 
         Query: {
             categories: async () => {
