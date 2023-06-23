@@ -3,12 +3,12 @@ import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import mysql from 'mysql2/promise';
+// import mysql from 'mysql2/promise';
+import createKnexConnection from './knex.js';
 
 async function main() {
     
-    const connection = await mysql.createConnection({ host: 'localhost', user: 'root', database: 'graphql_shop' });
-    const [rows, fields] = await connection.execute('SELECT * FROM `items`');
+    const db = createKnexConnection;
 
     const app = express();
     app.use('/image', express.static('public/image'));
@@ -39,10 +39,10 @@ async function main() {
 
         type Mutation {
             createItem(name: String!, category_id: Int!, detail: String!, image: Upload!, price: Int!): Item
-            deleteItem(id: Int!): Item
+            deleteItem(id: Int!): String
             createCategory(name: String!): Category
             updateCategory(id: Int!, name: String!): Category
-            deleteCategory(id: Int!): Category
+            deleteCategory(id: Int!): String
         }
     `;
 
@@ -50,15 +50,16 @@ async function main() {
 
         Query: {
             categories: async () => {
-                const [rows, fields] = await connection.execute('SELECT * FROM `categories`');
+                const rows = await db.select('*').from('categories');
                 return rows;
+
             },
             items: async () => {
-                const [rows, fields] = await connection.execute(`SELECT * FROM items` );
+                const rows = await db('items').select('*');
                 return rows;
             },
             item: async (parent, { id }) => {
-                const [rows, fields] = await connection.execute(`SELECT * FROM items WHERE id = ?`, [id]);
+                const rows = await db('items').select('*').where('id', id);
                 if (rows.length > 0) {
                     return rows[0];
                 } else {
@@ -68,10 +69,7 @@ async function main() {
         },
         Item: {
             category: async (parent) => {
-                const [rows, fields] = await connection.execute(
-                    `SELECT * FROM categories WHERE id = ?`
-                    , [parent.category_id]
-                );
+                const rows = await db('items').select('*').where('id', parent.category_id);
                 if (rows.length > 0) {
                     return rows[0];
                 } else {
@@ -87,49 +85,30 @@ async function main() {
                 await stream.pipe(fs.createWriteStream(pathName));
                 imagePath = `http://localhost:4000/image/${filename}`;
 
-                const [rows, fields] = await connection.execute(
-                    `INSERT INTO items (name, category_id, detail, image, price) VALUES (?, ?, ?, ?, ?)`
-                    , [name, category_id, detail, imagePath, price]
-                );
-                const [rows2, fields2] = await connection.execute(
-                    `SELECT * FROM items WHERE id = ?`
-                    , [rows.insertId]
-                );
-                return rows2[0];
+                const [id] = await db('items').insert({name: name,category_id: category_id, detail: detail,image: imagePath,price: price});
+                const rows = await db('items').select('*').where('id', id);
+                return rows;
             },
             deleteItem: async (parent, { id }) => {
-                const [rows, fields] = await connection.execute(
-                    `DELETE FROM items WHERE id = ?`
-                    , [id]
-                );
+                const rows = await db('items').delete().where('id', id);
             },
             createCategory: async (parent, { name }) => {
-                const [rows, fields] = await connection.execute(
-                    `INSERT INTO categories (name) VALUES (?)`
-                    , [name]
-                );
-                const [rows2, fields2] = await connection.execute(
-                    `SELECT * FROM categories WHERE id = ?`
-                    , [rows.insertId]
-                );
-                return rows2[0];
+                const [id] = await db.insert({ name: name }).into('categories');
+                const rows = await db.select('*').from('categories').where('id', id).first();
+                return rows;
             },
             updateCategory: async (parent, { id, name }) => {
-                const [rows, fields] = await connection.execute(
-                    `UPDATE categories SET name = ? WHERE id = ?`
-                    , [name, id]
-                );
-                const [rows2, fields2] = await connection.execute(
-                    `SELECT * FROM categories WHERE id = ?`
-                    , [id]
-                );
-                return rows2[0];
+                await db('categories').update({ name: name }).where('id', id);
+                const rows = await db('categories').select('*').where('id', id).first();
+                return rows;
             },
             deleteCategory: async (parent, { id }) => {
-                const [rows, fields] = await connection.execute(
-                    `DELETE FROM categories WHERE id = ?`
-                    , [id]
-                );
+                try{
+                    await db('categories').delete().where('id', id);
+                    return "Delete Success";
+                }catch(err){
+                    return "Delete Fail";
+                }
             }
         }
     };
