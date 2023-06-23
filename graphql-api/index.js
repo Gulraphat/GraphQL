@@ -10,12 +10,19 @@ async function main() {
         type Item {
             id: Int
             name: String
+            category: Category
             detail: String
             image: String
             price: Int
         }
+    
+        type Category {
+            id: Int
+            name: String
+        }
 
-        type Query {
+       type Query {
+            categories: [Category]
             items: [Item]
             item(id: Int!): Item 
         }
@@ -23,12 +30,29 @@ async function main() {
 
     const resolvers = {
         Query: {
+            categories: async () => {
+                const [rows, fields] = await connection.execute('SELECT * FROM `categories`');
+                return rows;
+            },
             items: async () => {
-                const [rows, fields] = await connection.execute('SELECT * FROM `items`');
+                const [rows, fields] = await connection.execute(`SELECT * FROM items` );
                 return rows;
             },
             item: async (parent, { id }) => {
-                const [rows, fields] = await connection.execute('SELECT * FROM `items` WHERE `id` = ?', [id]);
+                const [rows, fields] = await connection.execute(`SELECT * FROM items WHERE id = ?`, [id]);
+                if (rows.length > 0) {
+                    return rows[0];
+                } else {
+                    return null;
+                }
+            }
+        },
+        Item: {
+            category: async (parent) => {
+                const [rows, fields] = await connection.execute(
+                    `SELECT * FROM categories WHERE id = ?`
+                    , [parent.category_id]
+                );
                 if (rows.length > 0) {
                     return rows[0];
                 } else {
@@ -40,7 +64,7 @@ async function main() {
 
     const server = new ApolloServer({
         typeDefs,
-        resolvers,
+        resolvers,   
     });
 
     const app = express();
