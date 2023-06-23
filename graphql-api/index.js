@@ -97,11 +97,6 @@ async function main() {
                     `DELETE FROM items WHERE id = ?`
                     , [id]
                 );
-                const [rows2, fields2] = await connection.execute(
-                    `SELECT * FROM items WHERE id = ?`
-                    , [id]
-                );
-                return rows2[0];
             },
             createCategory: async (parent, { name }) => {
                 const [rows, fields] = await connection.execute(
@@ -130,11 +125,6 @@ async function main() {
                     `DELETE FROM categories WHERE id = ?`
                     , [id]
                 );
-                const [rows2, fields2] = await connection.execute(
-                    `SELECT * FROM categories WHERE id = ?`
-                    , [id]
-                );
-                return rows2[0];
             }
         }
     };
