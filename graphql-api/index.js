@@ -1,5 +1,5 @@
 import { ApolloServer } from 'apollo-server-express';
-// import { GraphQLUpload } from 'graphql-upload';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -10,7 +10,13 @@ async function main() {
     const connection = await mysql.createConnection({ host: 'localhost', user: 'root', database: 'graphql_shop' });
     const [rows, fields] = await connection.execute('SELECT * FROM `items`');
 
+    const app = express();
+    app.use('/image', express.static('public/image'));
+    app.use(graphqlUploadExpress());
+
     const typeDefs = `
+        scalar Upload
+
         type Item {
             id: Int
             name: String
@@ -32,7 +38,7 @@ async function main() {
         }
 
         type Mutation {
-            # createItem(name: String!, category_id: Int!, detail: String!, image: Upload!, price: Int!): Item
+            createItem(name: String!, category_id: Int!, detail: String!, image: Upload!, price: Int!): Item
             deleteItem(id: Int!): Item
             createCategory(name: String!): Category
             updateCategory(id: Int!, name: String!): Category
@@ -41,7 +47,6 @@ async function main() {
     `;
 
     const resolvers = {
-        // Upload: GraphQLUpload,
 
         Query: {
             categories: async () => {
@@ -75,23 +80,23 @@ async function main() {
             }
         },
         Mutation: {
-            // createItem: async (parent, { name, category_id, detail, image, price }) => {
-            //     const { createReadStream, filename, mimetype, encoding } = await image;
-            //     const stream = createReadStream();
-            //     const pathName = path.join(__dirname, `/public/image/${filename}`);
-            //     await stream.pipe(fs.createWriteStream(pathName));
-            //     imagePath = `http://localhost:4000/image/${filename}`;
+            createItem: async (parent, { name, category_id, detail, image, price }) => {
+                const { createReadStream, filename, mimetype, encoding } = await image;
+                const stream = createReadStream();
+                const pathName = path.join(__dirname, `/public/image/${filename}`);
+                await stream.pipe(fs.createWriteStream(pathName));
+                imagePath = `http://localhost:4000/image/${filename}`;
 
-            //     const [rows, fields] = await connection.execute(
-            //         `INSERT INTO items (name, category_id, detail, image, price) VALUES (?, ?, ?, ?, ?)`
-            //         , [name, category_id, detail, imagePath, price]
-            //     );
-            //     const [rows2, fields2] = await connection.execute(
-            //         `SELECT * FROM items WHERE id = ?`
-            //         , [rows.insertId]
-            //     );
-            //     return rows2[0];
-            // },
+                const [rows, fields] = await connection.execute(
+                    `INSERT INTO items (name, category_id, detail, image, price) VALUES (?, ?, ?, ?, ?)`
+                    , [name, category_id, detail, imagePath, price]
+                );
+                const [rows2, fields2] = await connection.execute(
+                    `SELECT * FROM items WHERE id = ?`
+                    , [rows.insertId]
+                );
+                return rows2[0];
+            },
             deleteItem: async (parent, { id }) => {
                 const [rows, fields] = await connection.execute(
                     `DELETE FROM items WHERE id = ?`
@@ -133,9 +138,6 @@ async function main() {
         typeDefs,
         resolvers,   
     });
-
-    const app = express();
-    app.use('/image', express.static('public/image'));
 
     await server.start();
     server.applyMiddleware({ app });

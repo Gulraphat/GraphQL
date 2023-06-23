@@ -16,7 +16,7 @@
     "apollo-server": "^3.12.0",
     "apollo-server-express": "^3.12.0",
     "graphql": "^16.6.0",
-    "graphql-upload": "^16.0.2",
+    "graphql-upload": "14.x.x",
     "mysql2": "^3.3.5"
   },
   "devDependencies": {
