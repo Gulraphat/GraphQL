@@ -2,28 +2,29 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-CREATE TABLE `items` (
-  `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `detail` varchar(500) NOT NULL,
-  `image` varchar(255) NOT NULL,
-  `price` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
+  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `category_id` (`category_id`),
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+CREATE TABLE `users` (
+  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`),
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+CREATE TABLE `items` (
+  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `detail` varchar(500) NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `price` int(11) NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES categories(id),
+  FOREIGN KEY (seller_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `categories` (`name`) VALUES
 ('Cat'),
@@ -32,11 +33,16 @@ INSERT INTO `categories` (`name`) VALUES
 ('Bird'),
 ('Fish');
 
-INSERT INTO `items` (`name`, `category_id`, `detail`, `image`, `price`) VALUES
-('First Cat', 1, 'meow meow', 'http://localhost:4000/image/1.jpg', '1000'),
-('Second Cat', 1, 'meow!', 'http://localhost:4000/image/2.jpg', '2000'),
-('Third Cat', 1, 'meoooooooow', 'http://localhost:4000/image/3.jpg', '1500'),
-('Fourth Cat', 1, 'meow meow meow!', 'http://localhost:4000/image/4.jpg', '1000'),
-('Fifth Cat', 1, 'meooooooooow meow!', 'http://localhost:4000/image/5.jpg', '2500');
+INSERT INTO `users` (`name`, `email`, `password`) VALUES
+('admin', 'admin@gmail.com', 'admin'),
+('user1', 'user1@gmail.com', 'user1'),
+('user2', 'user2@gmail.com', 'user2');
+
+INSERT INTO `items` (`name`, `category_id`, `seller_id`, `detail`, `image`, `price`) VALUES
+('First Cat', 1, 2, 'meow meow', 'http://localhost:4000/image/1.jpg', '1000'),
+('Second Cat', 1, 2, 'meow!', 'http://localhost:4000/image/2.jpg', '2000'),
+('Third Cat', 1, 3, 'meoooooooow', 'http://localhost:4000/image/3.jpg', '1500'),
+('Fourth Cat', 1, 3, 'meow meow meow!', 'http://localhost:4000/image/4.jpg', '1000'),
+('Fifth Cat', 1, 2, 'meooooooooow meow!', 'http://localhost:4000/image/5.jpg', '2500');
 
 COMMIT;

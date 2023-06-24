@@ -1,9 +1,12 @@
 import { ApolloServer } from 'apollo-server-express';
 import typeDefs from'./src/graphql/typedefs/index.js';
 import resolvers from './src/graphql/resolvers/index.js';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import express from 'express';
 
 const app = express();
+app.use('/image', express.static('public/image'));
+app.use(graphqlUploadExpress());
 
 const server = new ApolloServer({
     typeDefs,

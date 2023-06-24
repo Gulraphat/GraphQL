@@ -1,6 +1,4 @@
 import { gql } from 'apollo-server-express';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
-import categories from './categories.js';
 
 export default gql`
     scalar Upload
@@ -9,6 +7,7 @@ export default gql`
         id: Int
         name: String
         category: Category
+        seller: User
         detail: String
         image: String
         price: Int
@@ -20,7 +19,7 @@ export default gql`
     }
 
     type Mutation {
-        createItem(name: String!, category_id: Int!, detail: String!, image: Upload!, price: Int!): Item
+        createItem(name: String!, category_id: Int!, seller_id: Int!, detail: String!, image: Upload!, price: Int!): String
         deleteItem(id: Int!): String
     }
 `;

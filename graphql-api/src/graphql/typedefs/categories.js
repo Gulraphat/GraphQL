@@ -10,8 +10,8 @@ export default gql`
     }
 
     type Mutation {
-        createCategory(name: String!): Category
-        updateCategory(id: Int!, name: String!): Category
+        createCategory(name: String!): String
+        updateCategory(id: Int!, name: String!): String
         deleteCategory(id: Int!): String
     }
 `;

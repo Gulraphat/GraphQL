@@ -22,19 +22,26 @@ export default {
         category: async (parent) => {
             const rows = await db('categories').select('*').where('id', parent.category_id).first();
             return rows;
+        },
+        seller: async (parent) => {
+            const rows = await db('users').select('*').where('id', parent.seller_id).first();
+            return rows;
         }
     },
     Mutation: {
-        createItem: async (parent, { name, category_id, detail, image, price }) => {
-            const { createReadStream, filename, mimetype, encoding } = await image;
-            const stream = createReadStream();
-            const pathName = path.join(__dirname, `/public/image/${filename}`);
-            await stream.pipe(fs.createWriteStream(pathName));
-            imagePath = `http://localhost:4000/image/${filename}`;
+        createItem: async (parent, { name, category_id, seller_id, detail, image, price }) => {
+            try{
+                const { createReadStream, filename, mimetype, encoding } = await image;
+                const stream = createReadStream();
+                const pathName = path.join(__dirname, `/public/image/${filename}`);
+                await stream.pipe(fs.createWriteStream(pathName));
+                imagePath = `http://localhost:4000/image/${filename}`;
 
-            const [id] = await db('items').insert({name: name,category_id: category_id, detail: detail,image: imagePath,price: price});
-            const rows = await db('items').select('*').where('id', id);
-            return rows;
+                await db('items').insert({name: name,category_id: category_id, seller_id: seller_id, detail: detail,image: imagePath,price: price});
+                return "Create Success";
+            }catch(err){
+                return "Create Fail";
+            }
         },
         deleteItem: async (parent, { id }) => {
             try{

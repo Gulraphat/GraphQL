@@ -11,14 +11,20 @@ export default {
     },
     Mutation: {
         createCategory: async (parent, { name }) => {
-            const [id] = await db.insert({ name: name }).into('categories');
-            const rows = await db.select('*').from('categories').where('id', id).first();
-            return rows;
+            try{
+                await db.insert({ name: name }).into('categories');
+                return "Create Success";
+            }catch(err){
+                return "Create Fail";
+            }
         },
         updateCategory: async (parent, { id, name }) => {
-            await db('categories').update({ name: name }).where('id', id);
-            const rows = await db('categories').select('*').where('id', id).first();
-            return rows;
+            try{
+                await db('categories').update({ name: name }).where('id', id);
+                return "Update Success";
+            }catch(err){
+                return "Update Fail";
+            }
         },
         deleteCategory: async (parent, { id }) => {
             try{
