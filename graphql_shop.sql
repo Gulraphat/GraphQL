@@ -26,6 +26,21 @@ CREATE TABLE `items` (
   FOREIGN KEY (seller_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `orders` (
+  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `buyer_id` int(11) NOT NULL,
+  FOREIGN KEY (buyer_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `order_items` (
+  `order_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`order_id`, `item_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`),
+  FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `categories` (`name`) VALUES
 ('Cat'),
 ('Dog'),
