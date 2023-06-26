@@ -9,6 +9,7 @@ export default gql`
         email: String
         password: String
         image: String
+        role: String
     }
 
     type Query {
