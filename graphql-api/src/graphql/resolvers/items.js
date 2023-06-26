@@ -33,9 +33,9 @@ export default {
             try{
                 const { createReadStream, filename, mimetype, encoding } = await image;
                 const stream = createReadStream();
-                const pathName = path.join(__dirname, `/public/image/${filename}`);
+                const pathName = path.join(__dirname, `/public/images/users/${filename}`);
                 await stream.pipe(fs.createWriteStream(pathName));
-                imagePath = `http://localhost:4000/image/${filename}`;
+                imagePath = `http://localhost:4000/images/items/${filename}`;
 
                 await db('items').insert({name: name,category_id: category_id, seller_id: seller_id, detail: detail,image: imagePath,price: price});
                 return "Create Success";

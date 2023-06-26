@@ -1,4 +1,6 @@
 import createKnexConnection from '../../knex.js';
+import path from 'path';
+import fs from 'fs';
 const db = createKnexConnection;
 
 export default {
@@ -40,15 +42,45 @@ export default {
                 return "Create Fail";
             }
         },
-        updateUser: async (parent, { id, name, email, password }) => {
+        changePassword: async (parent, { id, password }) => {
+            try{
+                await db('users').update({password: password}).where('id', id);
+                return "Change Success";
+            }catch(err){
+                return "Change Fail";
+            }
+        },
+        changeImage: async (parent, { id, image }) => {
+            try{
+                const { createReadStream, filename, mimetype, encoding } = await image;
+                const stream = createReadStream();
+                const pathName = path.join(__dirname, `/public/images/users/${filename}`);
+                await stream.pipe(fs.createWriteStream(pathName));
+                imagePath = `http://localhost:4000/images/users/${filename}`;
+
+                await db.users.update({image: imagePath}).where('id', id);
+                return "Change Success";
+            }catch(err){
+                return "Change Fail";
+            }
+        },
+        changeName: async (parent, { id, name }) => {
+            try{
+                await db('users').update({name: name}).where('id', id);
+                return "Change Success";
+            }catch(err){
+                return "Change Fail";
+            }
+        },
+        changeEmail: async (parent, { id, email }) => {
             try{
                 if(await db('users').select('*').where('email', email).first()){
                     return "Email already exists";
                 }
-                await db('users').update({ name: name,email: email,password: password }).where('id', id);
-                return "Update Success";
+                await db('users').update({email: email}).where('id', id);
+                return "Change Success";
             }catch(err){
-                return "Update Fail";
+                return "Change Fail";
             }
         },
         deleteUser: async (parent, { id }) => {

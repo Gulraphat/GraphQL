@@ -5,6 +5,7 @@ export default gql`
         id: Int
         buyer: User
         items: [OrderItem]
+        total_price: Int
     }
 
     type Query {
@@ -14,7 +15,7 @@ export default gql`
     }
 
     type Mutation {
-        createOrder(buyer_id: Int!, items: [InputOrderItem!]!): String
+        createOrder(buyer_id: Int!, items: [InputOrderItem!]!, ): String
       }
       
     input InputOrderItem {
