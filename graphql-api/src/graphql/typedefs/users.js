@@ -7,6 +7,7 @@ export default gql`
         id: Int
         name: String
         email: String
+        username: String
         password: String
         image: String
         role: String
@@ -15,11 +16,11 @@ export default gql`
     type Query {
         users: [User]
         user(id: Int!): User
-        login(email: String!, password: String!): String
+        login(username: String!, password: String!): String
     }
 
     type Mutation {
-        createUser(name: String!, email: String!, password: String!): String
+        createUser(name: String!, email: String!, username: String!, password: String!): String
         changePassword(id: Int!, password: String!): String
         changeImage(id: Int!, image: Upload!): String
         changeName(id: Int!, name: String!): String

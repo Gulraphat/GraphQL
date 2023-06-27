@@ -1,9 +1,11 @@
 import createKnexConnection from '../../knex.js';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import path from 'path';
-import fs from 'fs';
+import { createWriteStream } from 'fs';
 const db = createKnexConnection;
 
 export default {
+    Upload: GraphQLUpload,
     Query: {
         users: async () => {
             const rows = await db('users').select('*');
@@ -17,26 +19,29 @@ export default {
                 return null;
             }
         },
-        login: async (parent, { email, password }) => {
-            const rows = await db('users').select('*').where('email', email).first();
+        login: async (parent, { username, password }) => {
+            const rows = await db('users').select('*').where('username', username).first();
             if (rows) {
                 if (rows.password === password) {
                     return "Login Success";
                 } else {
-                    return "Email or Password Incorrect";
+                    return "Username or Password Incorrect";
                 }
             } else {
-                return "Email or Password Incorrect";
+                return "Username or Password Incorrect";
             }
         }
     },
     Mutation: {
-        createUser: async (parent, { name, email, password }) => {
+        createUser: async (parent, { name, email, username, password }) => {
             try{
+                if(await db('users').select('*').where('username', username).first()){
+                    return "Username already exists";
+                }
                 if(await db('users').select('*').where('email', email).first()){
                     return "Email already exists";
                 }
-                await db('users').insert({name: name,email: email,password: password});
+                await db('users').insert({name: name,email: email, username: username,password: password});
                 return "Create Success";
             }catch(err){
                 return "Create Fail";
@@ -51,27 +56,26 @@ export default {
             }
         },
         changeImage: async (parent, { id, image }) => {
-            try{
-                const { createReadStream, filename, mimetype, encoding } = await image;
-                const stream = createReadStream();
-                const pathName = path.join(__dirname, `/public/images/users/${filename}`);
-                await stream.pipe(fs.createWriteStream(pathName));
-                imagePath = `http://localhost:4000/images/users/${filename}`;
-
-                await db.users.update({image: imagePath}).where('id', id);
-                return "Change Success";
-            }catch(err){
-                return "Change Fail";
+            try {
+              const { createReadStream, filename, mimetype, encoding } = await image;
+              const stream = createReadStream();
+              const pathName = path.join(process.cwd(), `public/images/users/${filename}`);
+              const writeStream = createWriteStream(pathName);
+          
+              await new Promise((resolve, reject) => {
+                stream.pipe(writeStream)
+                  .on('finish', resolve)
+                  .on('error', reject);
+              });
+          
+              const imagePath = `http://localhost:4000/images/users/${filename}`;
+              await db('users').where('id', id).update({ image: imagePath });
+          
+              return "Change Success";
+            } catch (err) {
+              return "Change Fail";
             }
-        },
-        changeName: async (parent, { id, name }) => {
-            try{
-                await db('users').update({name: name}).where('id', id);
-                return "Change Success";
-            }catch(err){
-                return "Change Fail";
-            }
-        },
+          },
         changeEmail: async (parent, { id, email }) => {
             try{
                 if(await db('users').select('*').where('email', email).first()){

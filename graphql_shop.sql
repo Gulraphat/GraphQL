@@ -11,6 +11,7 @@ CREATE TABLE `users` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
+  `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `image` varchar(255) DEFAULT 'http://localhost:4000/images/users/user.jpg',
   `role` varchar(50) NOT NULL DEFAULT 'user'
@@ -51,12 +52,12 @@ INSERT INTO `categories` (`name`) VALUES
 ('Bird'),
 ('Fish');
 
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
-('admin', 'admin@gmail.com', 'admin', 'admin');
+INSERT INTO `users` (`name`, `email`, `username`, `password`, `role`) VALUES
+('admin', 'admin@gmail.com', 'admin', 'admin', 'admin');
 
-INSERT INTO `users` (`name`, `email`, `password`) VALUES
-('user1', 'user1@gmail.com', 'user1'),
-('user2', 'user2@gmail.com', 'user2');
+INSERT INTO `users` (`name`, `email`, `username`, `password`) VALUES
+('user1', 'user1@gmail.com', 'user1', '12345678'),
+('user2', 'user2@gmail.com', 'user2', '12345678');
 
 INSERT INTO `items` (`name`, `category_id`, `seller_id`, `detail`, `image`, `price`) VALUES
 ('First Cat', 1, 2, 'meow meow', 'http://localhost:4000/images/items/1.jpg', '1000'),
