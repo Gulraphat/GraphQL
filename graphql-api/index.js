@@ -5,7 +5,8 @@ import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import express from 'express';
 
 const app = express();
-app.use('/image', express.static('public/image'));
+app.use('/images/items', express.static('public/images/items'));
+app.use('/images/users', express.static('public/images/users'));
 app.use(graphqlUploadExpress());
 
 const server = new ApolloServer({

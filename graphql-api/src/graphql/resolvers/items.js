@@ -1,9 +1,11 @@
 import createKnexConnection from '../../knex.js';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import path from 'path';
-import fs from 'fs';
+import { createWriteStream } from 'fs';
 const db = createKnexConnection;
 
 export default {
+    Upload: GraphQLUpload,
     Query: {
         items: async () => {
             const rows = await db('items').select('*');
@@ -33,11 +35,18 @@ export default {
             try{
                 const { createReadStream, filename, mimetype, encoding } = await image;
                 const stream = createReadStream();
-                const pathName = path.join(__dirname, `/public/image/${filename}`);
-                await stream.pipe(fs.createWriteStream(pathName));
-                imagePath = `http://localhost:4000/image/${filename}`;
-
+                const pathName = path.join(process.cwd(), `public/images/items/${filename}`);
+                const writeStream = createWriteStream(pathName);
+            
+                await new Promise((resolve, reject) => {
+                  stream.pipe(writeStream)
+                    .on('finish', resolve)
+                    .on('error', reject);
+                });
+            
+                const imagePath = `http://localhost:4000/images/items/${filename}`;
                 await db('items').insert({name: name,category_id: category_id, seller_id: seller_id, detail: detail,image: imagePath,price: price});
+                
                 return "Create Success";
             }catch(err){
                 return "Create Fail";

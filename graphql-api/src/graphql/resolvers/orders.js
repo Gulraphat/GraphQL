@@ -47,9 +47,9 @@ export default {
         }
     },
     Mutation: {
-        createOrder: async (parent, { buyer_id, items }) => {
+        createOrder: async (parent, { buyer_id, items, total_price}) => {
             try {
-                const rows = await db('orders').insert({ buyer_id: buyer_id });
+                const rows = await db('orders').insert({ buyer_id: buyer_id, total_price: total_price});
                 const order_id = rows[0];
                 for (let i = 0; i < items.length; i++) {
                     await db('order_items').insert({ order_id: order_id, item_id: items[i].item_id, quantity: items[i].quantity });
