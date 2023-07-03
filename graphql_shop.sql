@@ -10,11 +10,12 @@ CREATE TABLE `categories` (
 CREATE TABLE `users` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `username` varchar(255) NOT NULL,
+  `email` varchar(50) NOT NULL UNIQUE,
+  `username` varchar(255) NOT NULL UNIQUE,
   `password` varchar(255) NOT NULL,
   `image` varchar(255) DEFAULT 'http://localhost:4000/images/users/user.jpg',
-  `role` varchar(50) NOT NULL DEFAULT 'user'
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `token` varchar(255) DEFAULT NULL,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `items` (

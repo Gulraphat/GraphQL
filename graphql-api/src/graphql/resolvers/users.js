@@ -2,6 +2,8 @@ import createKnexConnection from '../../knex.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import path from 'path';
 import { createWriteStream } from 'fs';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 const db = createKnexConnection;
 
 export default {
@@ -18,18 +20,6 @@ export default {
             } else {
                 return null;
             }
-        },
-        login: async (parent, { username, password }) => {
-            const rows = await db('users').select('*').where('username', username).first();
-            if (rows) {
-                if (rows.password === password) {
-                    return "Login Success";
-                } else {
-                    return "Username or Password Incorrect";
-                }
-            } else {
-                return "Username or Password Incorrect";
-            }
         }
     },
     Mutation: {
@@ -41,7 +31,10 @@ export default {
                 if(await db('users').select('*').where('email', email).first()){
                     return "Email already exists";
                 }
-                await db('users').insert({name: name,email: email, username: username,password: password});
+
+                const encryptedPassword = await bcrypt.hash(password, 10);
+
+                await db('users').insert({name: name,email: email, username: username,password: encryptedPassword});
                 return "Create Success";
             }catch(err){
                 return "Create Fail";
@@ -49,7 +42,8 @@ export default {
         },
         changePassword: async (parent, { id, password }) => {
             try{
-                await db('users').update({password: password}).where('id', id);
+                const encryptedPassword = await bcrypt.hash(password, 10);
+                await db('users').update({password: encryptedPassword}).where('id', id);
                 return "Change Success";
             }catch(err){
                 return "Change Fail";
@@ -58,7 +52,7 @@ export default {
         changeImage: async (parent, { id, image }) => {
             try {
               const { createReadStream, filename, mimetype, encoding } = await image;
-              const stream = createReadStream();
+            //   const stream = createReadStream();
               const pathName = path.join(process.cwd(), `public/images/users/${filename}`);
               const writeStream = createWriteStream(pathName);
           
@@ -93,6 +87,16 @@ export default {
                 return "Delete Success";
             }catch(err){
                 return "Delete Fail";
+            }
+        },
+        login: async (parent, { username, password }) => {
+            const rows = await db('users').select('*').where('username', username).first();
+            if (rows && await bcrypt.compare(password, rows.password)) {
+                const token = jwt.sign({ id: rows.id, username: rows.username }, 'secret');
+                await db('users').update({ token: token }).where('id', rows.id);
+                return rows;
+            } else {
+                throw new Error('Invalid username or password');
             }
         }
     }

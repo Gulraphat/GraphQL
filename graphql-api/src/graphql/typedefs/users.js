@@ -11,12 +11,12 @@ export default gql`
         password: String
         image: String
         role: String
+        token: String
     }
 
     type Query {
         users: [User]
         user(id: Int!): User
-        login(username: String!, password: String!): String
     }
 
     type Mutation {
@@ -26,5 +26,6 @@ export default gql`
         changeName(id: Int!, name: String!): String
         changeEmail(id: Int!, email: String!): String
         deleteUser(id: Int!): String
+        login(username: String!, password: String!): User
     }
 `;
