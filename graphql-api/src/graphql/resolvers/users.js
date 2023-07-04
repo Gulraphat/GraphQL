@@ -94,6 +94,7 @@ export default {
             if (rows && await bcrypt.compare(password, rows.password)) {
                 const token = jwt.sign({ id: rows.id, username: rows.username }, 'secret');
                 await db('users').update({ token: token }).where('id', rows.id);
+                rows.token = token;
                 return rows;
             } else {
                 throw new Error('Invalid username or password');
