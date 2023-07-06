@@ -3,6 +3,18 @@ import { gql } from 'apollo-server-express';
 export default gql`
     scalar Upload
 
+    input RegisterInput {
+        name: String!
+        email: String!
+        username: String!
+        password: String!
+    }
+
+    input LoginInput {
+        username: String!
+        password: String!
+    }
+
     type User {
         id: Int
         name: String
@@ -20,12 +32,12 @@ export default gql`
     }
 
     type Mutation {
-        createUser(name: String!, email: String!, username: String!, password: String!): String
+        registerUser(registerInput: RegisterInput): String
+        loginUser(loginInput: LoginInput): User
         changePassword(id: Int!, password: String!): String
         changeImage(id: Int!, image: Upload!): String
         changeName(id: Int!, name: String!): String
         changeEmail(id: Int!, email: String!): String
         deleteUser(id: Int!): String
-        login(username: String!, password: String!): User
     }
 `;

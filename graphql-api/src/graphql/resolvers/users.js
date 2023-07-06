@@ -23,7 +23,7 @@ export default {
         }
     },
     Mutation: {
-        createUser: async (parent, { name, email, username, password }) => {
+        registerUser: async (parent, { registerInput: { name, email, username, password } }) => {
             if(await db('users').select('*').where('username', username).first()){
                 throw new Error('Username already exists');
             }
@@ -35,6 +35,17 @@ export default {
 
             await db('users').insert({name: name,email: email, username: username,password: encryptedPassword});
             return "Create Success";
+        },
+        loginUser: async (parent, { loginInput: { username, password } }) => {
+            const rows = await db('users').select('*').where('username', username).first();
+            if (rows && await bcrypt.compare(password, rows.password)) {
+                const token = jwt.sign({ id: rows.id, username: rows.username }, 'secret');
+                await db('users').update({ token: token }).where('id', rows.id);
+                rows.token = token;
+                return rows;
+            } else {
+                throw new Error('Invalid username or password');
+            }
         },
         changePassword: async (parent, { id, password }) => {
             try{
@@ -81,17 +92,6 @@ export default {
                 return "Delete Success";
             }else{
                 throw new Error('User not found');
-            }
-        },
-        login: async (parent, { username, password }) => {
-            const rows = await db('users').select('*').where('username', username).first();
-            if (rows && await bcrypt.compare(password, rows.password)) {
-                const token = jwt.sign({ id: rows.id, username: rows.username }, 'secret');
-                await db('users').update({ token: token }).where('id', rows.id);
-                rows.token = token;
-                return rows;
-            } else {
-                throw new Error('Invalid username or password');
             }
         }
     }
