@@ -10,11 +10,12 @@ CREATE TABLE `categories` (
 CREATE TABLE `users` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `username` varchar(255) NOT NULL,
+  `email` varchar(50) NOT NULL UNIQUE,
+  `username` varchar(255) NOT NULL UNIQUE,
   `password` varchar(255) NOT NULL,
   `image` varchar(255) DEFAULT 'http://localhost:4000/images/users/user.jpg',
-  `role` varchar(50) NOT NULL DEFAULT 'user'
+  `role` varchar(50) NOT NULL DEFAULT 'user',
+  `token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `items` (
@@ -53,11 +54,11 @@ INSERT INTO `categories` (`name`) VALUES
 ('Fish');
 
 INSERT INTO `users` (`name`, `email`, `username`, `password`, `role`) VALUES
-('admin', 'admin@gmail.com', 'admin', 'admin', 'admin');
+('admin', 'admin@gmail.com', 'admin', '$2a$10$f8Q65aIlaJ8d.NrjVFFP8u/SJfAY/snqC2E7ZUw6VPU/1I9Oocc9C', 'admin');
 
 INSERT INTO `users` (`name`, `email`, `username`, `password`) VALUES
-('user1', 'user1@gmail.com', 'user1', '12345678'),
-('user2', 'user2@gmail.com', 'user2', '12345678');
+('user1', 'user1@gmail.com', 'user1', '$2a$10$uyr3LUeiLr94ZvCbtqev6uGHrNoJYnNSujLlxfhQTvkhBUUvrBSv2'),
+('user2', 'user2@gmail.com', 'user2', '$2a$10$9d8Ba3sK8IVk4QzUKABh3.fsCeLZx1lvmeYb2yaSlAbVTeZO4pdJ2');
 
 INSERT INTO `items` (`name`, `category_id`, `seller_id`, `detail`, `image`, `price`) VALUES
 ('First Cat', 1, 2, 'meow meow', 'http://localhost:4000/images/items/1.jpg', '1000'),
