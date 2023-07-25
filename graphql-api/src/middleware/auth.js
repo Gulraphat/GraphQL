@@ -1,4 +1,4 @@
-import { AuthenticationError } from "apollo-server-express";  
+import { AuthenticationError } from "apollo-server";  
 import jwt from "jsonwebtoken";
 
 module.exports = (context) => {

@@ -4,15 +4,16 @@ export default gql`
     scalar Upload
 
     input RegisterInput {
-        name: String!
-        email: String!
-        username: String!
-        password: String!
+        name: String
+        email: String
+        username: String
+        password: String
+        comfirmPassword: String
     }
 
     input LoginInput {
-        username: String!
-        password: String!
+        username: String
+        password: String
     }
 
     type User {

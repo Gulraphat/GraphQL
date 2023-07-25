@@ -23,7 +23,7 @@ export default {
         }
     },
     Mutation: {
-        registerUser: async (parent, { registerInput: { name, email, username, password } }) => {
+        registerUser: async (_, { registerInput: { name, email, username, password } }) => {
             if(await db('users').select('*').where('username', username).first()){
                 throw new Error('Username already exists');
             }
@@ -36,7 +36,7 @@ export default {
             await db('users').insert({name: name,email: email, username: username,password: encryptedPassword});
             return "Create Success";
         },
-        loginUser: async (parent, { loginInput: { username, password } }) => {
+        loginUser: async (_, { loginInput: { username, password } }) => {
             const rows = await db('users').select('*').where('username', username).first();
             if (rows && await bcrypt.compare(password, rows.password)) {
                 const token = jwt.sign({ id: rows.id, username: rows.username }, 'secret');
